@@ -56,7 +56,7 @@ gulp.task('jshint', function () {
       'app/elements/**/*.js',
       'app/elements/**/*.html'
     ])
-    .pipe(reload({stream: true, once: true}))
+    .pipe(reload({stream: true, once: true, open: false}))
     .pipe($.jshint.extract()) // Extract JS from .html files
     .pipe($.jshint({esnext: true}))
     .pipe($.jshint.reporter('jshint-stylish'))
@@ -186,6 +186,7 @@ gulp.task('serve', ['styles', 'elements', 'catalog:dev'], function () {
 
   browserSync({
     notify: true,
+    open: false,
     server: {
       baseDir: dirs,
       middleware: mw
@@ -203,6 +204,7 @@ gulp.task('serve', ['styles', 'elements', 'catalog:dev'], function () {
 gulp.task('serve:dist', ['default'], function () {
   browserSync({
     notify: false,
+    open: false,
     // Run as an https by uncommenting 'https: true'
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
