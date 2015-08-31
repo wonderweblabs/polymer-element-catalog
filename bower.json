@@ -55,6 +55,7 @@
         "cmi-slider": "./bower_components/cmi-slider",
         "cmi-table": "./bower_components/cmi-table",
         "cmi-tabs": "./bower_components/cmi-tabs",
-        "cmi-toggle-button": "./bower_components/cmi-toggle-button"
+        "cmi-toggle-button": "./bower_components/cmi-toggle-button",
+        "web-animations-js": "./bower_components/web-animations-js"
     }
 }
