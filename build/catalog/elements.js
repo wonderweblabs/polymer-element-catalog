@@ -51,6 +51,12 @@ module.exports = function (imports) {
           // Set up object schema
           console.log("-",elementName,"(" + details._release + ")");
 
+          if(data == undefined || data == null) {
+            done();
+            throw(err);
+            return;
+          }
+
           var combined = data.elements.concat(data.behaviors);
           var hero;
           combined.forEach(function(el) {
