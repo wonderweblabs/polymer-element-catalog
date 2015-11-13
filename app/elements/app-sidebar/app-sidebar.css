@@ -1,27 +1,18 @@
 :host {
   height: 100%;
-  box-shadow: 0 0 8px rgba(0,0,0,0.4);
   box-sizing: border-box;
   z-index: 2;
   background: white;
   border-right: 1px solid #e5e5e5;
-  @apply(--layout-fit);
-  @apply(--layout);
-  @apply(--layout-vertical);
-  overflow: hidden;
-}
-
-::content paper-toolbar {
-  --paper-toolbar-background: white;
-}
-
-::content .content {
-  @apply(--layout-flex);
   @apply(--layout);
   @apply(--layout-vertical);
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+::content paper-toolbar {
+  --paper-toolbar-background: white;
 }
 
 ::content .section {
@@ -54,4 +45,8 @@
   color: var(--secondary-text-color);
   padding: 0 24px;
   margin: 0;
+}
+
+::content .content {
+  @apply(--layout-vertical);
 }

@@ -1,8 +1,9 @@
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
-<link rel="import" href="../../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
 
 <link rel="import" href="../app-sidebar/app-sidebar.html">
 <link rel="import" href="../app-logo/app-logo.html">
@@ -10,12 +11,12 @@
 <link rel="import" href="../cart-icon/cart-icon.html">
 <link rel="import" href="../catalog-data/catalog-data.html">
 <link rel="import" href="../catalog-package/catalog-package.html">
-<link rel="import" href="../element-card/element-card.html">
 <link rel="import" href="../package-symbol/package-symbol.html">
 <link rel="import" href="../tag-link/tag-link.html">
 <link rel="import" href="../theme-color/theme-color.html">
 <link rel="import" href="../element-action-menu/element-action-menu.html">
 <link rel="import" href="../element-table/element-table.html">
+<link rel="import" href="../element-table-cards/element-table-cards.html">
 <link rel="import" href="../responsive-element/responsive-element.html">
 
 <dom-module id="page-browse">
@@ -23,10 +24,7 @@
   <template>
     <catalog-data elements="{{elements}}" packages="{{packages}}"></catalog-data>
     <catalog-package name="[[package]]" data="{{packageInfo}}"></catalog-package>
-    <iron-media-query query="(max-width: 640px)" query-matches="{{_narrowViewport}}"></iron-media-query>
-
-    <responsive-element>
-      <paper-drawer-panel id="drawerPanel" responsive-width="900px" drawer-width="272px" disable-edge-swipe>
+      <paper-drawer-panel id="drawerPanel" responsive-width="900px" narrow="{{narrowMode}}" drawer-width="272px" disable-edge-swipe>
         <app-sidebar drawer>
           <paper-toolbar>
             <app-logo class="flex" tabindex="1"></app-logo>
@@ -34,14 +32,13 @@
           </paper-toolbar>
           <div id="search" class="layout horizontal center">
             <iron-icon icon="search"></iron-icon>
-            <input id="query" type="search" autocomplete="off" value="{{q::keyup}}" placeholder="Search Elements" class="flex">
+            <input id="query" type="search" autocomplete="off" value="{{q::keyup}}" placeholder="Search Elements" class="flex" on-search="onSearch">
           </div>
           <div class="content">
             <div id="package-tag" hidden$="[[!tag]]">
               <span>[[tag]]</span> <iron-icon icon="clear" on-tap="clearTag"></iron-icon>
             </div>
             <div id="package-list">
-              <h5>Products</h5>
               <nav>
                 <a class="package" is="app-link" href="/browse?package=" active$="[[_isEqual(package,'')]]" tabindex="1">
                   <div class="layout horizontal center">
@@ -52,66 +49,39 @@
                 <template is="dom-repeat" items="[[packages]]">
                   <a class="package" is="app-link" href$="[[_packageLink(item.name)]]" active$="[[_isEqual(package,item.name)]]" tabindex="1">
                     <div class="layout horizontal center">
-                      <package-symbol aria-hidden="true" package="[[item]]"></package-symbol>
+                      <package-symbol aria-hidden="true" symbol="[[item.symbol]]" color="[[item.color]]"></package-symbol>
                       <span class="title flex">[[item.title]]</span>
                     </div>
                   </a>
                 </template>
               </nav>
             </div>
-            <div id="tags">
-              <!--<h5>Tags</h5>-->
-            </div>
-            <!--<div id="package-info" hidden$="[[!packageInfo.name]]">
-              <div id="package-header">
-                <package-symbol package="[[packageInfo]]" class="large"></package-symbol>
-                <h2 id="package-title">[[packageInfo.title]]</h2>
-                <span id="package-version">[[packageInfo.version]]</span>
-                <h4 id="package-tagline">[[packageInfo.tagline]]</h4>
-              </div>
-              <div id="package-details">
-                <div class="section">
-                  <h5>Product Description</h5>
-                  <p id="package-desc">[[packageInfo.description]]</p>
-                </div>
-                <div class="section">
-                  <h5>Tags</h5>
-
-                </div>
-              </div>
-            </div>-->
             <div hidden$="[[!tag]]" id="current-tag" class="horizontal layout center">
               <b>Tag:</b> <span class="flex">[[tag]]</span> <iron-icon icon="clear" on-tap="clearTag"></iron-icon>
             </div>
           </div>
         </app-sidebar>
-
-        <div id="container" class="fit" view$="[[_actualView(view,_narrowViewport)]]" main>
-          <div class="elements-title horizontal layout center">
-            <iron-icon icon="menu" paper-drawer-toggle></iron-icon>
-            <h2 class="flex"><span>[[pageTitle]]</span> <span class="count">[[_elementCount]]</span></h2>
-            <iron-icon id="package-view-mode" icon="[[viewIcon]]" on-tap="toggleView" hidden$="[[_forceCards]]"></iron-icon>
-            <cart-icon id="cart-toggle" icon="stars" on-tap="cartOpen"></cart-icon>
+        <paper-header-panel id="container" mode="[[_getMode(narrowMode)]]" view$="[[_actualView(view)]]" main>
+          <div class="paper-header">
+            <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+            <h2 class="flex">[[pageTitle]]</h2>
+            <paper-icon-button class="toggleViewButton" icon="[[viewIcon]]" on-tap="toggleView" hidden$="[[_forceCards]]"></paper-icon-button>
+            <cart-icon class="cartButton" id="cart-toggle" icon="stars" on-tap="cartOpen"></cart-icon>
           </div>
+          <div id="content">
+            <div id="package-heading" hidden$="[[!packageInfo]]">
+              <div class="description">[[packageInfo.description]]</div>
+            </div>
 
-          <div id="package-heading" hidden$="[[!packageInfo]]">
-            <div class="description">[[packageInfo.description]]</div>
-          </div>
-
-          <div id="element-cards" class="horizontal layout wrap">
-            <template is="dom-if" if="[[_stampCards(view,_forceCards)]]">
-              <template name="element-cards-repeat" is="dom-repeat" items="[[_filteredElements]]">
-                <element-card element="[[item.name]]"></element-card>
-              </template>
+            <template is="dom-if" if="[[_stampCards(view)]]" restamp>
+              <element-table-cards id="element-cards" elements="[[_filteredElements]]"></element-table-cards>
+            </template>
+            <template is="dom-if" if="[[_stampTable(view)]]" restamp>
+              <element-table color="[[_getColor(packageInfo)]]" elements="[[_filteredElements]]" on-tag-selected="updateTag"></element-table>
             </template>
           </div>
-
-          <template is="dom-if" if="[[_stampTable(view,_forceCards)]]">
-            <element-table elements="[[_filteredElements]]" on-tag-selected="updateTag"></element-table>
-          </template>
-        </div>
+        </paper-header-panel>
       </paper-drawer-panel>
-    </responsive-element>
   </template>
 </dom-module>
 
@@ -126,7 +96,7 @@
         pageTitle: {type: String},
 
         // Query Parameters
-        q: {type: String, notify: true, value: ''},
+        q: {type: String, notify: true, value: '', observer: '_qChanged'},
         tag: {type: String, notify: true, value: ''},
         package: {type: String, notify: true, value: ''},
         view: {type: String, notify: true},
@@ -141,25 +111,19 @@
 
         _filteredElements: Array,
         _elementCount: Number,
-        _narrowViewport: {type: Boolean, observer: '_updateForceCards'},
         _forceCards: {type: Boolean},
       },
       observers: [
-        'updateURL(q,package,tag,view,elements)',
-        'updateMeta(packageInfo)'
+        'updateURL(q,package, tag, view, elements)',
+        'updateMeta(package, packageInfo)',
+        'scrollToTop(package)'
       ],
       listeners: {
         'update-params': '_handleParamsUpdate'
       },
 
       ready: function() {
-        this._updateForceCards();
         this.view = this._forceCards ? 'cards' : 'table';
-      },
-
-      attached: function() {
-        this.updateMeta();
-        this.updateSearch();
       },
 
       filter: function(element) {
@@ -235,32 +199,38 @@
       _packageLink: function(name) {
         return "/browse?package=" + name;
       },
-      updateSearch: function() {
-        var params = this._parseQueryString();
-        if (params && params.q) {
-          this.async(function() { this.$.query.focus(); });
+      _qChanged: function(q) {
+        if (q) {
+          this.async(function() {
+            this.$.query.focus();
+
+            // make sure to force the cursor to the end of the
+            // input. Only an issue in Firefox.
+            this.$.query.setSelectionRange(q.length, q.length);
+          });
         }
       },
-      updateURL: function(q,p,tag,view) {
+      updateURL: function(q, packageName, packageInfo, tag, view) {
         var qs = this._buildQueryString();
         if (qs !== _lastNavigated && this.router) {
           _lastNavigated = qs;
-         this.router.go("/browse" + (qs.length ? "?" + qs : ""), {replace: true});
+          this.router.go('/browse' + (qs.length ? '?' + qs : ''), {replace: true});
         }
+        this.updateMeta(packageName, this.packageInfo);
 
-        this.updateMeta();
         if (this.elements) {
           this._filteredElements = this.elements.filter(this.filter.bind(this));
           this._elementCount = this._filteredElements.length;
         }
+        this.scrollToTop();
       },
-      updateMeta: function(packageInfo) {
+      updateMeta: function(packageName, packageInfo) {
         if (this.q && this.q.length) {
           var t = "'" + this.q + "' ";
-          t += (this.packageInfo && this.packageInfo.title) ? this.packageInfo.title : "Elements";
+          t += (packageInfo && packageInfo.title) ? packageInfo.title : "Elements";
           this.pageTitle = t;
-        } else if (this.packageInfo) {
-          this.pageTitle = this.packageInfo.title;
+        } else if (packageInfo && packageInfo.title) {
+          this.pageTitle = packageInfo.title;
         } else if (this.tagList.length) {
           this.pageTitle = "Elements Tagged '" + this.tagList.join("' or '") + "'";
         } else {
@@ -268,6 +238,7 @@
         }
 
         this.fire('page-meta', { title: this.pageTitle });
+        this.$.drawerPanel.closeDrawer();
       },
       toggleView: function() {
         if (this.view === 'table') {
@@ -290,43 +261,35 @@
       cartOpen: function(e) {
         this.fire('cart-open');
       },
-      _stampCards: function(view,stamp) {
-        return stamp || view === 'cards';
+      onSearch: function(e) {
+        // when a user clicks on the (x) button we need to be sure to
+        // clear the query
+        this.q = this.$.query.value;
       },
-      _stampTable: function(view, skip) {
-        return !skip && view === 'table';
+      scrollToTop: function() {
+        this.$.container.scroller.scrollTop = 0;
+      },
+      _stampCards: function(view) {
+        return view === 'cards';
+      },
+      _stampTable: function(view) {
+        return view === 'table';
       },
       closeDrawer: function() {
         this.$.drawerPanel.closeDrawer();
       },
-      _detectIEVersion: function () {
-        // via http://stackoverflow.com/questions/17907445/how-to-detect-ie11
-        var rv = -1;
-        var ua, re;
-        if (navigator.appName === 'Microsoft Internet Explorer')
-        {
-          ua = navigator.userAgent;
-          re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
-          if (re.exec(ua) !== null)
-            rv = parseFloat( RegExp.$1 );
-        }
-        else if (navigator.appName === 'Netscape')
-        {
-          ua = navigator.userAgent;
-          re  = new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})|Edge/([0-9]{1,}[\.0-9]{0,})");
-          if (re.exec(ua) !== null)
-            rv = parseFloat( RegExp.$1 );
-        }
-        return rv;
-      },
       _actualView: function(view, force) {
         return force ? 'cards' : view;
       },
-      _updateForceCards: function() {
-        this._forceCards = this._narrowViewport || this._detectIEVersion() > 0;
-      },
       _isEqual: function(a,b) {
         return a === b;
+      },
+      _getColor: function() {
+        return this.packageInfo && this.packageInfo.color ? this.packageInfo.color : '';
+      },
+
+      _getMode: function(narrow) {
+        return narrow ? 'waterfall' : 'scroll';
       }
     });
   })();
