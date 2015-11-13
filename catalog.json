@@ -48,6 +48,20 @@
       "color":"#ffab91",
       "symbol":"Mo",
       "tagline": "Wrappers for third-party libraries"
+    },
+    {
+      "name":"cmi-elements",
+      "title":"CMI",
+      "color":"#a4c82f",
+      "symbol":"CMI",
+      "tagline": "curo material interface"
+    },
+    {
+      "name":"cmi-doc-elements",
+      "title":"CMI Doc",
+      "color":"#a4c82f",
+      "symbol":"CD",
+      "tagline": "curo material interface documentation elements"
     }
   ]
 }
